@@ -88,7 +88,7 @@ However new connections and waits are still permitted
 Signal:Destroy()
 ```
 Disconnects every connections, resumes every Waits with nil passed to those threads and sets `Signal.Dead` to true.
-Preventing any new connections (Any connect methods in `Signal` will return nil instead of a `Connection`) and `Signal:Wait()` will never yield always return nil
+Preventing any new connections (Any connect methods in `Signal` will return nil instead of a `Connection`) and `Signal:Wait()` will never yield and always return nil
 <br/><br/>
 
 ### Connection
