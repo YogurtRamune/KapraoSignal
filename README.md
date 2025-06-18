@@ -10,7 +10,7 @@ Cons
 - No `Once` connection yet (may be implemented in the future)
 - Reconnection isn't supported
 - No wrap Roblox's signals constructor
-- Not optimized
+- Not optimized and never profiled or benchmark
 
 Possible features that may be added in future versions:
 - Supports `Once` connections
