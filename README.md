@@ -1,5 +1,5 @@
 # KapraoSignal V1
-A luau module for handling events/signals 
+A luau module for handling events/signals\
 Made specifically for roblox development
 
 Pros
