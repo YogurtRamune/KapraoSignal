@@ -1,4 +1,4 @@
-# ImmediateSignal V1
+# KapraoSignal V1
 A roblox event/signal module
 
 Pros
@@ -16,9 +16,9 @@ Possible features that may be added in future versions:
 - Supports `Once` connections
 - Priorotize immediate connections' callback invoke order through `Priority` value in `Connection`s
 
-### ImmediateSignal
+### KapraoSignal
 ```lua
-ImmediateSignal.new() -> Signal
+KapraoSignal.new() -> Signal
 ```
 ### Signal
 ```lua
