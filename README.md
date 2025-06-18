@@ -2,8 +2,8 @@
 A roblox event/signal module
 
 Pros
-- Has a seperation between immediete connect (`Signal:ImmedieteConnect()`) and the conventional task spawned connection (`Signal:Connect()`)
-- Supports wait if a signal is ever fired (`Signal:WaitIfNeverFired()`)
+- Has a seperation between immediete connect (`Signal:ImmedieteConnect()`) and the conventional connect (`Signal:Connect()`)
+- Supports wait if a signal is never fired (`Signal:WaitIfNeverFired()`)
 - Wait is resumed and nil is passed if a `Signal` is destroyed
 
 Cons
