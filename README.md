@@ -1,8 +1,8 @@
-# ImmedieteSignal V1
+# ImmediateSignal V1
 A roblox event/signal module
 
 Pros
-- Has a seperation between immediete connect (`Signal:ImmedieteConnect()`) and the conventional connect (`Signal:Connect()`)
+- Has a seperation between immediate connect (`Signal:ImmediateConnect()`) and the conventional connect (`Signal:Connect()`)
 - Supports wait if a signal is never fired (`Signal:WaitIfNeverFired()`)
 - Wait is resumed and nil is passed if a `Signal` is destroyed
 
@@ -14,11 +14,11 @@ Cons
 
 Possible features that may be added in future versions:
 - Supports `Once` connections
-- Priorotize immediete connections' callback invoke order through `Priority` value in `Connection`s
+- Priorotize immediate connections' callback invoke order through `Priority` value in `Connection`s
 
-### ImmedieteSignal
+### ImmediateSignal
 ```lua
-ImmedieteSignal.new() -> Signal
+ImmediateSignal.new() -> Signal
 ```
 ### Signal
 ```lua
