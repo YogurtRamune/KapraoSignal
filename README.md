@@ -73,6 +73,7 @@ Signal:Fire(...: any)
 ```
 Triggers connections' callbacks and the variadic arguments are passed to those callbacks.
 Waits are resumed returning the passed variadic arguments. if a thread's status is not `suspended` then that thread will be skipped
+If the signal is already destroyed/dead this method won't do anything.
 <br/><br/>
 
 ```lua
