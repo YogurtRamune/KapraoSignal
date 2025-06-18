@@ -36,29 +36,29 @@ Status of a signal if `Signal:Fire()` has ever been invoked. the lastest variadi
 ```lua
 Signal.LastestFiredValue : {any}
 ```
-Lastest variadic arguments passed to `Signal:Fire()` and packed directly (`{...}` not `table.pack(...)`)
+Lastest variadic arguments passed to `Signal:Fire()` and packed directly (`{...}` not `table.pack(...)`).
 If no arguments were passed then it'll return an empty table (`{}`)
 <br/><br/>
 
 ```lua
 Signal:ImmediateConnect(callback: (...any) -> ()) -> Connection?
 ```
-If the signal isn't Destroyed/Dead, `Connection` will be returned. Otherwise, `nil`
-Has the most priority and will run in the same thread where its signal is fired
+If the signal isn't Destroyed/Dead, `Connection` will be returned. Otherwise, `nil`.
+Has the most priority and will run in the same thread where its signal is fired.
 Be cautious while using this method as it can interrupt the thread where signal is fired if there's any error in any callbacks
 <br/><br/>
 
 ```lua
 Signal:Connect(callback: (...any) -> ()) -> Connection?
 ```
-If the signal isn't Destroyed/Dead, `Connection` will be returned. Otherwise, `nil`
+If the signal isn't Destroyed/Dead, `Connection` will be returned. Otherwise, `nil`.
 After the signal is fired, the callback will be run through `task.spawn` after immediate connections' callback
 <br/><br/>
 
 ```lua
 Signal:Wait() -> (...any)?
 ```
-Yields the current thread unless the signal is already dead it'll return nil instead
+Yields the current thread unless the signal is already dead it'll return nil instead.
 Returns any variadic arguments passed to `Signal:Fire()` unless the signal is being destroyed while waiting
 <br/><br/>
 
@@ -78,14 +78,14 @@ Waits are resumed returning the passed variadic arguments. if a thread's status 
 ```lua
 Signal:MassDisconnect()
 ```
-Disconnects every connections but waits are not resumed and left yielding/suspended
+Disconnects every connections but waits are not resumed and left yielding/suspended.
 However new connections and waits are still permitted
 <br/><br/>
 
 ```lua
 Signal:Destroy()
 ```
-Disconnects every connections, resumes every Waits with nil passed to those threads and sets `Signal.Dead` to true
+Disconnects every connections, resumes every Waits with nil passed to those threads and sets `Signal.Dead` to true.
 Preventing any new connections (Any connect methods in `Signal` will return nil instead of a `Connection`) and `Signal:Wait()` will never yield always return nil
 <br/><br/>
 
