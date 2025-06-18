@@ -1,5 +1,6 @@
 # KapraoSignal V1
-A roblox event/signal module
+A luau module for handling events/signals 
+Made specifically for roblox development
 
 Pros
 - Has a seperation between immediate connect (`Signal:ImmediateConnect()`) and the conventional connect (`Signal:Connect()`)
