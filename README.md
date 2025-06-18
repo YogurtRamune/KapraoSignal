@@ -5,7 +5,7 @@ Made specifically for roblox development
 Pros
 - Has a seperation between immediate connect (`Signal:ImmediateConnect()`) and the conventional connect (`Signal:Connect()`)
 - Supports wait if a signal is never fired (`Signal:WaitIfNeverFired()`)
-- Wait is resumed and nil is passed if a `Signal` is destroyed or being destroyed while waiting
+- `Wait` is resumed and nil is passed if a `Signal` is destroyed or being destroyed while waiting
 
 Cons
 - No `Once` connection yet (may be implemented in the future)
