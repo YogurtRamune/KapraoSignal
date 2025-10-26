@@ -1,6 +1,6 @@
 --!strict
 
-local Signal = {}
+local KapraoSignal = {}
 
 local ConnectionMethods = {}
 function ConnectionMethods:Disconnect()
@@ -125,7 +125,7 @@ export type Signal = typeof(setmetatable({} :: {
 	LastestFiredValue: {any}
 }, {__index = SignalMethods}))
 
-Signal.new = function(): Signal
+KapraoSignal.new = function(): Signal
 	return setmetatable({
 		Connects = {},
 		ImmediateConnects = {},
@@ -136,5 +136,5 @@ Signal.new = function(): Signal
 	}, {__index = SignalMethods})
 end
 
-table.freeze(Signal)
-return Signal
+table.freeze(KapraoSignal)
+return KapraoSignal
