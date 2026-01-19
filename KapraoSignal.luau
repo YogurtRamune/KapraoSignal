@@ -34,6 +34,17 @@ function SignalMethods:Connect(callback: (...any) -> ()): Connection?
 		return nil
 	end
 end
+
+-- [NEW] Connects and fires the last value asynchronously (next frame/spawned)
+function SignalMethods:ConnectWithLast(callback: (...any) -> ()): Connection?
+	local connection = self:Connect(callback)
+	if connection and self.EverFired then
+		local lastValues = self.LastestFiredValue :: {any}
+		task.spawn(callback, table.unpack(lastValues))
+	end
+	return connection
+end
+
 function SignalMethods:ImmediateConnect(callback: (...any) -> ()): Connection?
 	if self.ImmediateConnects then
 		local connection: Connection = setmetatable({
@@ -47,6 +58,18 @@ function SignalMethods:ImmediateConnect(callback: (...any) -> ()): Connection?
 		return nil
 	end
 end
+
+-- [NEW] Connects and fires the last value synchronously (immediately)
+function SignalMethods:ImmediateConnectWithLast(callback: (...any) -> ()): Connection?
+	local connection = self:ImmediateConnect(callback)
+	if connection and self.EverFired then
+		local lastValues = self.LastestFiredValue :: {any}
+		-- Direct call to maintain synchronous behavior
+		callback(table.unpack(lastValues))
+	end
+	return connection
+end
+
 function SignalMethods:Wait(): (...any?)
 	if self.Waits then
 		table.insert(self.Waits, coroutine.running())
