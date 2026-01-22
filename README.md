@@ -207,7 +207,7 @@ The signal that the connection is connected to, could be nil in case the connect
 
 
 ```lua
-SignalMethods:Disconnect()
+Connection:Disconnect()
 
 ```
 
