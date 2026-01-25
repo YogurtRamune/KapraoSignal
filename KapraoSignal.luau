@@ -14,6 +14,7 @@ export type Connection<T...> = {
 export type Signal<T...> = {
 	Dead: boolean,
 	EverFired: boolean,
+	LatestFiredValue: {any},
 	Connect: (self: Signal<T...>, callback: (T...) -> ()) -> Connection<T...>?,
 	ConnectWithLast: (self: Signal<T...>, callback: (T...) -> ()) -> Connection<T...>?,
 	ImmediateConnect: (self: Signal<T...>, callback: (T...) -> ()) -> Connection<T...>?,
@@ -35,6 +36,7 @@ export type ExplicitConnection<U, V...> = {
 export type ExplicitSignal<U, V...> = {
 	Dead: boolean,
 	EverFired: boolean,
+	LatestFiredValue: {any},
 	Connect: (self: ExplicitSignal<U, V...>, callback: U) -> ExplicitConnection<U, V...>?,
 	ConnectWithLast: (self: ExplicitSignal<U, V...>, callback: U) -> ExplicitConnection<U, V...>?,
 	ImmediateConnect: (self: ExplicitSignal<U, V...>, callback: U) -> ExplicitConnection<U, V...>?,
@@ -56,6 +58,7 @@ export type AnyConnection = {
 export type AnySignal = {
 	Dead: boolean,
 	EverFired: boolean,
+	LatestFiredValue: {any},
 	Connect: (self: AnySignal, callback: (...any) -> ()) -> AnyConnection?,
 	ConnectWithLast: (self: AnySignal, callback: (...any) -> ()) -> AnyConnection?,
 	ImmediateConnect: (self: AnySignal, callback: (...any) -> ()) -> AnyConnection?,
