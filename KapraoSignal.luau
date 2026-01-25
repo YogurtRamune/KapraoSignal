@@ -14,7 +14,6 @@ export type Connection<T...> = {
 export type Signal<T...> = {
 	Dead: boolean,
 	EverFired: boolean,
-	LatestFiredValue: {any},
 	Connect: (self: Signal<T...>, callback: (T...) -> ()) -> Connection<T...>?,
 	ConnectWithLast: (self: Signal<T...>, callback: (T...) -> ()) -> Connection<T...>?,
 	ImmediateConnect: (self: Signal<T...>, callback: (T...) -> ()) -> Connection<T...>?,
@@ -24,6 +23,7 @@ export type Signal<T...> = {
 	WaitIfNeverFired: (self: Signal<T...>) -> (T...),
 	MassDisconnect: (self: Signal<T...>) -> (),
 	Destroy: (self: Signal<T...>) -> (),
+	GetLatestFiredValue: (self: Signal<T...>) -> (T...)
 }
 
 -- [TYPE 2] Explicit: U is the callback type, V... are the fire parameters
@@ -36,7 +36,6 @@ export type ExplicitConnection<U, V...> = {
 export type ExplicitSignal<U, V...> = {
 	Dead: boolean,
 	EverFired: boolean,
-	LatestFiredValue: {any},
 	Connect: (self: ExplicitSignal<U, V...>, callback: U) -> ExplicitConnection<U, V...>?,
 	ConnectWithLast: (self: ExplicitSignal<U, V...>, callback: U) -> ExplicitConnection<U, V...>?,
 	ImmediateConnect: (self: ExplicitSignal<U, V...>, callback: U) -> ExplicitConnection<U, V...>?,
@@ -46,6 +45,7 @@ export type ExplicitSignal<U, V...> = {
 	WaitIfNeverFired: (self: ExplicitSignal<U, V...>) -> (V...),
 	MassDisconnect: (self: ExplicitSignal<U, V...>) -> (),
 	Destroy: (self: ExplicitSignal<U, V...>) -> (),
+	GetLatestFiredValue: (self: ExplicitSignal<U, V...>) -> (V...)
 }
 
 -- [TYPE 3] Any: Accepts any parameters (loose typing)
@@ -58,7 +58,7 @@ export type AnyConnection = {
 export type AnySignal = {
 	Dead: boolean,
 	EverFired: boolean,
-	LatestFiredValue: {any},
+	-- This remains {any}? because AnySignal is untyped by definition
 	Connect: (self: AnySignal, callback: (...any) -> ()) -> AnyConnection?,
 	ConnectWithLast: (self: AnySignal, callback: (...any) -> ()) -> AnyConnection?,
 	ImmediateConnect: (self: AnySignal, callback: (...any) -> ()) -> AnyConnection?,
@@ -68,6 +68,7 @@ export type AnySignal = {
 	WaitIfNeverFired: (self: AnySignal) -> (...any),
 	MassDisconnect: (self: AnySignal) -> (),
 	Destroy: (self: AnySignal) -> (),
+	GetLatestFiredValue: (self: AnySignal) -> (...any)
 }
 
 -- // INTERNAL IMPLEMENTATION //
@@ -87,6 +88,9 @@ end
 local SignalMethods = {}
 
 function SignalMethods:Connect(callback: (...any) -> ()): any
+	if self.Dead then
+		return
+	end
 	if self.Connects then
 		local connection = setmetatable({
 			Signal = self,
@@ -101,8 +105,13 @@ function SignalMethods:Connect(callback: (...any) -> ()): any
 end
 
 function SignalMethods:ConnectWithLast(callback: (...any) -> ()): any
+	if self.Dead then
+		return
+	end
 	local connection = self:Connect(callback)
 	if connection and self.EverFired then
+		-- Internal implementation still treats it as {any} because the methods are generic
+		-- but the Type Definitions above restrict user access.
 		local lastValues = self.LatestFiredValue :: {any}
 		task.spawn(callback, table.unpack(lastValues))
 	end
@@ -110,6 +119,9 @@ function SignalMethods:ConnectWithLast(callback: (...any) -> ()): any
 end
 
 function SignalMethods:ImmediateConnect(callback: (...any) -> ()): any
+	if self.Dead then
+		return
+	end
 	if self.ImmediateConnects then
 		local connection = setmetatable({
 			Signal = self,
@@ -124,6 +136,9 @@ function SignalMethods:ImmediateConnect(callback: (...any) -> ()): any
 end
 
 function SignalMethods:ImmediateConnectWithLast(callback: (...any) -> ()): any
+	if self.Dead then
+		return
+	end
 	local connection = self:ImmediateConnect(callback)
 	if connection and self.EverFired then
 		local lastValues = self.LatestFiredValue :: {any}
@@ -133,6 +148,9 @@ function SignalMethods:ImmediateConnectWithLast(callback: (...any) -> ()): any
 end
 
 function SignalMethods:Wait(): ...any
+	if self.Dead then
+		return
+	end
 	if self.Waits then
 		table.insert(self.Waits, coroutine.running())
 		return coroutine.yield()
@@ -142,6 +160,9 @@ function SignalMethods:Wait(): ...any
 end
 
 function SignalMethods:WaitIfNeverFired(): ...any
+	if self.Dead then
+		return
+	end
 	if self.EverFired then
 		return if type(self.LatestFiredValue) == "table" then table.unpack(self.LatestFiredValue) else nil
 	else
@@ -150,6 +171,9 @@ function SignalMethods:WaitIfNeverFired(): ...any
 end
 
 function SignalMethods:Fire(...: any)
+	if self.Dead then
+		return
+	end
 	self.EverFired = true
 	self.LatestFiredValue = {...}
 
@@ -174,6 +198,9 @@ function SignalMethods:Fire(...: any)
 end
 
 function SignalMethods:MassDisconnect()
+	if self.Dead then
+		return
+	end
 	if self.Connects then
 		for c: any, _: (...any) -> () in pairs(self.Connects) do
 			c:Disconnect()
@@ -189,6 +216,9 @@ function SignalMethods:MassDisconnect()
 end
 
 function SignalMethods:Destroy()
+	if self.Dead then
+		return
+	end
 	self:MassDisconnect()
 	if self.Waits then
 		for _: number, t: thread in ipairs(self.Waits) do
@@ -204,6 +234,13 @@ function SignalMethods:Destroy()
 	self.LatestFiredValue = nil
 end
 
+function SignalMethods:GetLatestFiredValue()
+	if self.Dead or not self.LatestFiredV then
+		return nil
+	end
+	return table.unpack(self.LatestFiredValue :: {any})
+end
+
 -- // CONSTRUCTORS //
 
 function KapraoSignal.new(): AnySignal
@@ -213,10 +250,10 @@ function KapraoSignal.new(): AnySignal
 		Waits = {},
 		Dead = false,
 		EverFired = false,
-		LatestFiredValue = {nil}
+		LatestFiredValue = {nil} 
 	}, {__index = SignalMethods})
 	return self :: any
 end
 
 table.freeze(KapraoSignal)
-return KapraoSignal
+return KapraoSignal3
