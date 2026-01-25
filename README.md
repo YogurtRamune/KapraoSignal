@@ -1,4 +1,4 @@
-# KapraoSignal V1.2.1
+# KapraoSignal V3
 
 A strict Luau module for handling events/signals
 
