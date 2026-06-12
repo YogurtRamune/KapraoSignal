@@ -35,7 +35,7 @@ Infers the callback signature directly from the arguments you define.
 local KapraoSignal = require(path.to.KapraoSignal)
 
 -- Create a signal that ONLY accepts a string and a number
-local HealthChanged = KapraoSignal.new() :: KapraoSignal.Signal<string, number>
+local HealthChanged = KapraoSignal.New() :: KapraoSignal.Signal<string, number>
 
 HealthChanged:Connect(function(name, health)
     -- Autocomplete knows 'name' is string, 'health' is number
@@ -47,20 +47,30 @@ Use this if you have a defined function type alias.
 
 ```luau
 type MyHandler = (string, number) -> ()
-local MySignal = KapraoSignal.new() :: KapraoSignal.ExplicitSignal<(parameter1: string, parameter2: number), string, number>
+local MySignal = KapraoSignal.New() :: KapraoSignal.ExplicitSignal<(parameter1: string, parameter2: number), string, number>
 ```
 
 **3. Dynamic Typing (`AnySignal`)** - *Default*
 Accepts any arguments (loose typing).
 
 ```luau
-local MySignal = KapraoSignal.new() -- Returns AnySignal by default
+local MySignal = KapraoSignal.New() -- Returns AnySignal by default
 ```
 
 ### KapraoSignal
 
 ```luau
-KapraoSignal.new() -> Signal<...any>
+KapraoSignal.New(...any) -> AnySignal
+```
+
+Creates a new signal. If initial arguments are provided, `Signal.EverFired` is set to `true` and `Signal.LatestFiredValue` is seeded with those arguments — so `ConnectWithLast`, `ImmediateConnectWithLast`, and `WaitIfNeverFired` will return them immediately without waiting for the first `Fire`.
+
+```luau
+-- No initial value
+local MySignal = KapraoSignal.New()
+
+-- With initial value — behaves as if already fired once
+local HealthChanged = KapraoSignal.New(100) :: KapraoSignal.Signal<number>
 ```
 
 ### Signal

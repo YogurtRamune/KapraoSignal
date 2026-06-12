@@ -268,14 +268,15 @@ end
 
 -- // CONSTRUCTORS //
 
-function KapraoSignal.new(): AnySignal
+function KapraoSignal.New(...: any): AnySignal
+	local hasInitial = select("#", ...) > 0
 	local self = setmetatable({
 		Connects = {},
 		ImmediateConnects = {},
 		Waits = {},
 		Dead = false,
-		EverFired = false,
-		LatestFiredValue = {nil} 
+		EverFired = hasInitial,
+		LatestFiredValue = if hasInitial then {...} else {nil}
 	}, {__index = SignalMethods})
 	return self :: any
 end
