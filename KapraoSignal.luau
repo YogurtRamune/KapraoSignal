@@ -21,6 +21,7 @@ export type Signal<T...> = {
 	Fire: (self: Signal<T...>, T...) -> (),
 	Wait: (self: Signal<T...>) -> (T...),
 	WaitIfNeverFired: (self: Signal<T...>) -> (T...),
+	Once: (self: Signal<T...>, callback: (T...) -> ()) -> Connection<T...>?,
 	MassDisconnect: (self: Signal<T...>) -> (),
 	Destroy: (self: Signal<T...>) -> (),
 	GetLatestFiredValue: (self: Signal<T...>) -> (T...)
@@ -43,6 +44,7 @@ export type ExplicitSignal<U, V...> = {
 	Fire: (self: ExplicitSignal<U, V...>, V...) -> (),
 	Wait: (self: ExplicitSignal<U, V...>) -> (V...),
 	WaitIfNeverFired: (self: ExplicitSignal<U, V...>) -> (V...),
+	Once: (self: ExplicitSignal<U, V...>, callback: U) -> ExplicitConnection<U, V...>?,
 	MassDisconnect: (self: ExplicitSignal<U, V...>) -> (),
 	Destroy: (self: ExplicitSignal<U, V...>) -> (),
 	GetLatestFiredValue: (self: ExplicitSignal<U, V...>) -> (V...)
@@ -66,6 +68,7 @@ export type AnySignal = {
 	Fire: (self: AnySignal, ...any) -> (),
 	Wait: (self: AnySignal) -> (...any),
 	WaitIfNeverFired: (self: AnySignal) -> (...any),
+	Once: (self: AnySignal, callback: (...any) -> ()) -> AnyConnection?,
 	MassDisconnect: (self: AnySignal) -> (),
 	Destroy: (self: AnySignal) -> (),
 	GetLatestFiredValue: (self: AnySignal) -> (...any)
@@ -170,14 +173,17 @@ function SignalMethods:WaitIfNeverFired(): ...any
 	end
 end
 
-function SignalMethods:Once(callback: (...any) -> ()): ()
+function SignalMethods:Once(callback: (...any) -> ()): any
 	if self.Dead then return end
 	local connection: any
-	connection = SignalMethods:Connect(function()
-		callback()
-		if connection then connection:Disconnect() end
-		connection = nil
+	connection = self:Connect(function(...)
+		if connection then
+			connection:Disconnect()
+			connection = nil
+		end
+		callback(...)
 	end)
+	return connection
 end
 
 function SignalMethods:Fire(...: any)
@@ -189,7 +195,10 @@ function SignalMethods:Fire(...: any)
 
 	if self.ImmediateConnects then
 		for _: any, c: (...any) -> () in pairs(self.ImmediateConnects) do
-			c(...)
+			local ok, err = pcall(c :: any, ...)
+			if not ok then
+				task.spawn(error, err)
+			end
 		end
 	end
 	if self.Connects then
@@ -200,7 +209,10 @@ function SignalMethods:Fire(...: any)
 	if self.Waits then
 		for _: number, t: thread in ipairs(self.Waits) do
 			if coroutine.status(t) == "suspended" then
-				coroutine.resume(t, ...)
+				local ok, err = coroutine.resume(t, ...)
+				if not ok then
+					task.spawn(error, err)
+				end
 			end
 		end
 		self.Waits = {}
@@ -233,7 +245,10 @@ function SignalMethods:Destroy()
 	if self.Waits then
 		for _: number, t: thread in ipairs(self.Waits) do
 			if coroutine.status(t) == "suspended" then
-				coroutine.resume(t, nil)
+				local ok, err = coroutine.resume(t, nil)
+				if not ok then
+					task.spawn(error, err)
+				end
 			end
 		end
 	end
@@ -245,7 +260,7 @@ function SignalMethods:Destroy()
 end
 
 function SignalMethods:GetLatestFiredValue()
-	if self.Dead or not self.LatestFiredV then
+	if self.Dead or not self.LatestFiredValue then
 		return nil
 	end
 	return table.unpack(self.LatestFiredValue :: {any})
