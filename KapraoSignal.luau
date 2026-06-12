@@ -170,6 +170,16 @@ function SignalMethods:WaitIfNeverFired(): ...any
 	end
 end
 
+function SignalMethods:Once(callback: (...any) -> ()): ()
+	if self.Dead then return end
+	local connection: any
+	connection = SignalMethods:Connect(function()
+		callback()
+		if connection then connection:Disconnect() end
+		connection = nil
+	end)
+end
+
 function SignalMethods:Fire(...: any)
 	if self.Dead then
 		return
@@ -256,4 +266,4 @@ function KapraoSignal.new(): AnySignal
 end
 
 table.freeze(KapraoSignal)
-return KapraoSignal3
+return KapraoSignal
