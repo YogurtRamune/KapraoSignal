@@ -18,8 +18,6 @@ Pros
 
 Cons
 
-* No `Once` connection yet (may be implemented in the future).
-
 * Reconnection isn't supported.
 
 * No wrapper for Roblox's RBXScriptSignal constructor.
@@ -92,13 +90,21 @@ Signal:ImmediateConnect(callback: (T...) -> ()) -> Connection?
 
 If the signal isn't Destroyed/Dead, `Connection` will be returned. Otherwise, `nil`.
 Has the most priority and will run in the same thread where its signal is fired.
-Be cautious while using this method as it can interrupt the thread where signal is fired if there's any error in any callbacks
+Errors in callbacks are caught via `pcall` and re-thrown in a separate thread, so a failing callback won't halt other connections or waits.
 
 ```luau
 Signal:ImmediateConnectWithLast(callback: (T...) -> ()) -> Connection?
 ```
 
 Acts exactly like `Signal:ImmediateConnect()`, but if `Signal.EverFired` is true, the callback will be invoked **synchronously** with `Signal.LatestFiredValue` immediately after connecting.
+
+```luau
+Signal:Once(callback: (T...) -> ()) -> Connection?
+```
+
+Like `Signal:Connect()`, but automatically disconnects after the callback is invoked once.
+Returns the `Connection` so it can be cancelled before it fires.
+If the signal is dead, returns `nil`.
 
 ```luau
 Signal:Connect(callback: (T...) -> ()) -> Connection?
